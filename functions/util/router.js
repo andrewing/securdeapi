@@ -1,4 +1,4 @@
-import ResponseError from './error';
+import { CODE } from './code';
 
 export const handlePath = (route, paths, ...rest) => {
   const [,,callback] = rest
