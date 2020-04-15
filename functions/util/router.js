@@ -1,6 +1,7 @@
 import ResponseError from './error';
 
 export const handlePath = (route, paths, ...rest) => {
+  const [,,callback] = rest
   if (!paths.length) return;
   const found = !paths.every(item => {
     const [func, path] = item;
@@ -11,7 +12,9 @@ export const handlePath = (route, paths, ...rest) => {
     }
     return true;
   });
-  if (!found) throw new ResponseError(404, 'Invalid Path!');
+  if (!found) {
+    callback(null, CODE(404, "Path not found"))
+  };
 };
 
 export const getNextPath = route => {
