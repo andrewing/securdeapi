@@ -3,8 +3,6 @@ import querystring from 'querystring'
 import { StringDecoder } from 'string_decoder'
 import * as routes from '.'
 import {handlePath} from './util/router'
-import "core-js/stable";
-import "regenerator-runtime/runtime";
 
 const PORT = process.env.PORT || 3000
 const {admin, auth, book, bookInstance, dbStart, refreshToken, review, test, user} = routes
