@@ -7,7 +7,7 @@
     "devstart": "nodemon --exec babel-node ./functions/server.js ",
     "start": "npm run build && node ./build/server.js",
     "build-babel": "babel -d ./build ./functions -s",
-    "clean": "rm -rf build && mkdir build",
+    "clean": "RD /S /Q build && mkdir build",
     "build": "npm run clean && npm run build-babel"
   },
   "author": "",
@@ -21,7 +21,6 @@
     "nodemon": "^2.0.3"
   },
   "dependencies": {
-    "@babel/runtime": "^7.9.2",
     "faker": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
