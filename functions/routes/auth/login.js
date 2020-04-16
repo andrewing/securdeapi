@@ -6,6 +6,10 @@ import {EXPIRATIONS, AUDIENCE} from '../../util/constants';
 import Account from '../../db/models/account';
 import db from '../../db/db';
 import SystemLog from '../../db/models/system_log';
+import moment from 'moment';
+
+const LIMIT = 5
+const TIME_IN_MINUTES = 60
 
 export const login = (route, event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -27,6 +31,18 @@ export const login = (route, event, context, callback) => {
         );
         throw new ResponseError(404, 'User Not Found');
       }
+      if(found.loginFailedHistory){
+        let attempts = 0
+        for(let i = found.loginFailedHistory.length - 1; i > found.loginFailedHistory.length - LIMIT - 1; i--){
+          if(moment(found.loginFailedHistory[i]).isBetween(moment().subtract(TIME_IN_MINUTES, 'minutes'), moment())){
+            attempts++
+          }else{
+            break;
+          }
+        }
+        
+        if(attempts >= LIMIT) throw new ResponseError(404, `Log in attempts exceeded try again in ${moment(found.loginFailedHistory[found.loginFailedHistory.length - LIMIT]).add(1,'hour').fromNow()}`);
+      }
 
       Account.authenticate(
         username,
@@ -43,6 +59,14 @@ export const login = (route, event, context, callback) => {
                 account: null,
               }),
             );
+            
+            Account.updateOne({
+              _id: found._id
+            },{
+              $push: {
+                loginFailedHistory: moment()
+              }
+            })
             throw new ResponseError(401, 'Incorrect Password');
           }
 

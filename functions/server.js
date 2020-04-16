@@ -39,7 +39,6 @@ app.all('*', (req, res) => {
       headers: req.headers,
       body: buffer
     }
-    console.log(req.headers)
 
     const context = {
 

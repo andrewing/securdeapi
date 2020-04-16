@@ -8,4 +8,5 @@ export const handler = (route,event, context, callback) => {
       randomName: faker.name.findName()
     }),
   );
+  
 };

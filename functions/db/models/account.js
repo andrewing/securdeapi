@@ -43,6 +43,7 @@ const accountSchema = new Schema({
     },
   ],
   salt: String,
+  loginFailedHistory: [Date]
 });
 
 accountSchema.statics.authenticate = (username, password, salt, type) => {
