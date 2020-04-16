@@ -1,10 +1,11 @@
-import http from 'http'
+import express from 'express'
+import cors from 'cors'
 import querystring from 'querystring'
 import { StringDecoder } from 'string_decoder'
 import * as routes from '.'
 import { handlePath, getNextPath } from './util/router'
-import { CODE } from './util/code'
 
+const app = express()
 const PORT = process.env.PORT || 9000
 const { admin, auth, book, bookInstance, dbStart, refreshToken, review, test, user } = routes
 
@@ -19,8 +20,9 @@ const ROUTES = [
   [test, '/test'],
   [user, '/user']
 ]
-
-const server = http.createServer((req, res) => {
+app.options('*', cors())
+app.use(cors())
+app.all('*', (req, res) => {
   const requrl = new URL(req.url, `http://${req.headers.host}`);
 
   const decoder = new StringDecoder('utf-8')
@@ -46,7 +48,7 @@ const server = http.createServer((req, res) => {
     const callback = (err, code) => {
       const { statusCode, body } = code
       res.writeHead(statusCode, {
-        'Access-Control-Request-Method': 'GET, POST, DELETE, PUT, OPTIONS',
+        'Access-Control-Request-Methods': 'GET, POST, DELETE, PUT, OPTIONS',
         'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
@@ -64,6 +66,6 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Listening to port ${PORT}...`)
 })
