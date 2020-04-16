@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
-import {CODE} from '../../util/code';
-import {SECRET, REFRESH_SECRET, jwtError} from '../../util/jwt';
+import { CODE } from '../../util/code';
+import { SECRET, REFRESH_SECRET, jwtError } from '../../util/jwt';
 import ResponseError from '../../util/error';
-import {EXPIRATIONS, AUDIENCE} from '../../util/constants';
+import { EXPIRATIONS, AUDIENCE } from '../../util/constants';
 import Account from '../../db/models/account';
 import db from '../../db/db';
 import SystemLog from '../../db/models/system_log';
@@ -18,9 +18,9 @@ export const login = (route, event, context, callback) => {
     return;
   }
   const body = JSON.parse(event.body);
-  const {username, password, type: loginType} = body;
+  const { username, password, type: loginType } = body;
   Account.findUserByUsername(username)
-    .then(({data: found}) => {
+    .then(({ data: found }) => {
       if (!found) {
         SystemLog.addLog(
           new SystemLog({
@@ -31,18 +31,17 @@ export const login = (route, event, context, callback) => {
         );
         throw new ResponseError(404, 'User Not Found');
       }
-      if(found.loginFailedHistory){
-        let attempts = 0
-        for(let i = found.loginFailedHistory.length - 1; i > found.loginFailedHistory.length - LIMIT - 1; i--){
-          if(moment(found.loginFailedHistory[i]).isBetween(moment().subtract(TIME_IN_MINUTES, 'minutes'), moment())){
-            attempts++
-          }else{
-            break;
-          }
+
+      let attempts = 0
+      for (let i = found.loginFailedHistory.length - 1; i > found.loginFailedHistory.length - LIMIT - 1; i--) {
+        if (moment(found.loginFailedHistory[i]).isBetween(moment().subtract(TIME_IN_MINUTES, 'minutes'), moment())) {
+          attempts++
+        } else {
+          break;
         }
-        
-        if(attempts >= LIMIT) throw new ResponseError(404, `Log in attempts exceeded try again in ${moment(found.loginFailedHistory[found.loginFailedHistory.length - LIMIT]).add(1,'hour').fromNow()}`);
       }
+
+      if (attempts >= LIMIT) throw new ResponseError(404, `Log in attempts exceeded try again in ${moment(found.loginFailedHistory[found.loginFailedHistory.length - LIMIT]).add(1, 'hour').fromNow()}`);
 
       Account.authenticate(
         username,
@@ -50,7 +49,7 @@ export const login = (route, event, context, callback) => {
         found.salt,
         loginType || AUDIENCE.USER_STUDENT,
       )
-        .then(({data: user}) => {
+        .then(({ data: user }) => {
           if (!user) {
             SystemLog.addLog(
               new SystemLog({
@@ -59,24 +58,37 @@ export const login = (route, event, context, callback) => {
                 account: null,
               }),
             );
-            
+
             Account.updateOne({
               _id: found._id
-            },{
+            }, {
               $push: {
                 loginFailedHistory: moment()
               }
             })
-            throw new ResponseError(401, 'Incorrect Password');
+              .then(()=>{
+
+              })
+            callback(null, CODE(401, "Incorrect Password"))
+            return
+          }else{
+            Account.updateOne({
+              _id: found._id
+            }, {
+              loginFailedHistory: []
+            })
+              .then(()=>{
+                
+              })
           }
 
-          const {type} = user;
-          const tokenPromise = jwt.sign({user}, SECRET, {
+          const { type } = user;
+          const tokenPromise = jwt.sign({ user }, SECRET, {
             expiresIn: EXPIRATIONS.access,
             audience: type,
           });
 
-          const refreshTokenPromise = jwt.sign({id: user._id}, REFRESH_SECRET, {
+          const refreshTokenPromise = jwt.sign({ id: user._id }, REFRESH_SECRET, {
             expiresIn: EXPIRATIONS.refresh,
           });
 
@@ -100,17 +112,17 @@ export const login = (route, event, context, callback) => {
               return
             })
             .catch(err => {
-              const {code, message} = jwtError(err);
+              const { code, message } = jwtError(err);
               callback(null, CODE(code || 500, message));
             });
         })
         .catch(err => {
-          const {code, message} = err;
+          const { code, message } = err;
           callback(null, CODE(code || 500, message));
         });
     })
     .catch(err => {
-      const {code, message} = err;
+      const { code, message } = err;
       callback(null, CODE(code || 500, message));
     });
   // const {data:user, err:authErr} = await
