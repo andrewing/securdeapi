@@ -10,6 +10,7 @@ export const get = (route, event, context, callback) => {
   Book.findAllBooks()
     .then(({data: books}) => {
       callback(null, CODE(200, 'Successfully retrieved books', {books}));
+      return
     })
     .catch(err => {
       const {code, message} = err;

@@ -73,6 +73,7 @@ export const login = (route, event, context, callback) => {
                   type,
                 }),
               );
+              return
             })
             .catch(err => {
               const {code, message} = jwtError(err);
