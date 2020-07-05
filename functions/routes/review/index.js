@@ -32,7 +32,7 @@ const def = async (route, event, context, callback) => {
     async (err, decoded) => {
       if (err) jwtError(err);
       Review.find({book: bookId})
-        .populate('book')
+        .populate('book account')
         .then(reviews => {
           reviews.sort((a, b) => b.dateCreated - a.dateCreated);
           callback(null, CODE(200, 'Success in getting reviews', {reviews}));
