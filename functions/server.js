@@ -13,7 +13,7 @@ const ROUTES = [
   [admin, '/admin'],
   [auth, '/auth'],
   [book, '/book'],
-  [bookInstance, '/book-nstance'],
+  [bookInstance, '/book-instance'],
   [dbStart, '/db-start'],
   [refreshToken, '/refresh-token'],
   [review, '/review'],

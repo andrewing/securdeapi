@@ -29,6 +29,7 @@ export const bookInstance = (route, ...rest) => {
 };
 
 const def = (route, event, context, callback) => {
+  console.log('hello')
   if (event.httpMethod !== 'GET') {
     callback(null, CODE(405, 'Method not allowed'));
     return;
